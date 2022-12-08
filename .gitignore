@@ -1,0 +1,5 @@
+conn_db.py
+venv
+database.env
+test.txt
+__pycache__
