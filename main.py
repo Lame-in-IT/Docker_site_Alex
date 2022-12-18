@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+from datetime import datetime
 import psycopg2
 import pandas as pd
 from statistics import mean
@@ -12,6 +13,7 @@ from download_file import download_file
 from conn_db import *
 from bd_zak import get_zak
 from get_session import get_engine_from_settings
+from dict_month import dict_month, dict_month_earth_2022
 
 app = FastAPI()
 
@@ -149,12 +151,17 @@ async def read_item(request: Request):
 async def analiz(data=Body()):
     categ = data["analiz"]
     market = data["analiz1"]
+    date_full = data["analiz2"].split(" ")
+    date_a = datetime.strptime(date_full[0], "%d.%m.%Y").date()
+    date_b = datetime.strptime(date_full[2], "%d.%m.%Y").date()
+    date_midle = int(str(date_b - date_a).split(" ")[0])
     date = data["analiz2"].replace("-", ".").replace(" ", "").split(".")
     date_old = str(date[2] + "-" + date[1] + "-" + date[0])
     date_new = str(date[5] + "-" + date[4] + "-" + date[3])
     connection = psycopg2.connect(database=POSTGRES_DB, host=POSTGRES_HOST,
                                   port=POSTGRES_PORT, user=POSTGRES_USER, password=POSTGRES_PASSWORD)
     connection.autocommit = True
+    list_viruchka = []
     list_prof = []
     list_valov = []
     list_collich = []
@@ -178,6 +185,8 @@ async def analiz(data=Body()):
             table_df = pd.read_sql(
                 f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}'",
                 con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
             for item_Выручка in table_df["Выручка"]:
                 list_prof.append(item_Выручка)
             for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
@@ -199,10 +208,47 @@ async def analiz(data=Body()):
                 except:
                     midle_rent = 0
                 list_value_rentab.append(midle_rent)
-            for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
-                if item_Принят_в_обработку not in list_date:
-                    list_date.append(item_Принят_в_обработку)
-                    list_date_1.append(item_Принят_в_обработку.strip())
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
             for item_stat in table_df["Статус_заказа"]:
                 if item_stat not in list_stat:
                     list_stat.append(item_stat)
@@ -232,16 +278,12 @@ async def analiz(data=Body()):
                 for item_1_stat_nub in table_df[table_df.Статус_заказа == f'{item_stat_nub}'].Количество_товара:
                     time_stat_nub.append(item_1_stat_nub)
                 list_numb_coll.append(int(sum(time_stat_nub)))
-            for item_Выруч in list_date:
-                time_list_Выруч = []
-                for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
-                    time_list_Выруч.append(item_1_Выруч)
-                midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
-                list_price_for_date.append(midle_rent_Выруч)
         else:
             table_df = pd.read_sql(
                 f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Маркетплейс = '{market}'",
                 con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
             for item_Выручка in table_df["Выручка"]:
                 list_prof.append(item_Выручка)
             for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
@@ -263,10 +305,47 @@ async def analiz(data=Body()):
                 except:
                     midle_rent = 0
                 list_value_rentab.append(midle_rent)
-            for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
-                if item_Принят_в_обработку not in list_date:
-                    list_date.append(item_Принят_в_обработку)
-                    list_date_1.append(item_Принят_в_обработку.strip())
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
             for item_stat in table_df["Статус_заказа"]:
                 if item_stat not in list_stat:
                     list_stat.append(item_stat)
@@ -307,6 +386,8 @@ async def analiz(data=Body()):
             table_df = pd.read_sql(
                 f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Категория_товара = '{categ}'",
                 con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
             for item_Выручка in table_df["Выручка"]:
                 list_prof.append(item_Выручка)
             for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
@@ -328,10 +409,47 @@ async def analiz(data=Body()):
                 except:
                     midle_rent = 0
                 list_value_rentab.append(midle_rent)
-            for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
-                if item_Принят_в_обработку not in list_date:
-                    list_date.append(item_Принят_в_обработку)
-                    list_date_1.append(item_Принят_в_обработку.strip())
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
             for item_stat in table_df["Статус_заказа"]:
                 if item_stat not in list_stat:
                     list_stat.append(item_stat)
@@ -371,6 +489,8 @@ async def analiz(data=Body()):
             table_df = pd.read_sql(
                 f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Маркетплейс = '{market}' AND Категория_товара = '{categ}'",
                 con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
             for item_Выручка in table_df["Выручка"]:
                 list_prof.append(item_Выручка)
             for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
@@ -392,10 +512,47 @@ async def analiz(data=Body()):
                 except:
                     midle_rent = 0
                 list_value_rentab.append(midle_rent)
-            for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
-                if item_Принят_в_обработку not in list_date:
-                    list_date.append(item_Принят_в_обработку)
-                    list_date_1.append(item_Принят_в_обработку.strip())
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
             for item_stat in table_df["Статус_заказа"]:
                 if item_stat not in list_stat:
                     list_stat.append(item_stat)
@@ -431,6 +588,7 @@ async def analiz(data=Body()):
                     time_list_Выруч.append(item_1_Выруч)
                 midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
                 list_price_for_date.append(midle_rent_Выруч)
+    sum_viruchka = '{0:,}'.format(int(sum(list_viruchka))).replace(',', ' ')
     summ = '{0:,}'.format(int(sum(list_prof))).replace(',', ' ')
     summ_val = '{0:,}'.format(int(sum(list_valov))).replace(',', ' ')
     summ_collich = '{0:,}'.format(sum(list_collich)).replace(',', ' ')
@@ -438,7 +596,6 @@ async def analiz(data=Body()):
         summ_rentab = round(mean(list_rentab), 1)
     except:
         summ_rentab = 0
-    list_date_1.sort(reverse=True)
     return {
         "message": f"{summ}",
         "message1": f"{summ_val}",
@@ -452,6 +609,281 @@ async def analiz(data=Body()):
         "message9": list_numb_coll,
         "message10": list_name_2,
         "message11": list_sum_name_1,
+        "message12": sum_viruchka,
+    }
+    
+@app.post("/analiz_1")
+async def analiz_1(data=Body()):
+    categ = data["analiz"]
+    market = data["analiz1"]
+    date_full = data["analiz2"].split(" ")
+    date_a = datetime.strptime(date_full[0], "%d.%m.%Y").date()
+    date_b = datetime.strptime(date_full[2], "%d.%m.%Y").date()
+    date_midle = int(str(date_b - date_a).split(" ")[0])
+    date = data["analiz2"].replace("-", ".").replace(" ", "").split(".")
+    date_old = str(date[2] + "-" + date[1] + "-" + date[0])
+    date_new = str(date[5] + "-" + date[4] + "-" + date[3])
+    prodaj = data["analiz3"]
+    valova = data["analiz4"]
+    kollich = data["analiz5"]
+    pocheitt = data["analiz6"]
+    viruchka = data["analiz7"]
+    connection = psycopg2.connect(database=POSTGRES_DB, host=POSTGRES_HOST,
+                                  port=POSTGRES_PORT, user=POSTGRES_USER, password=POSTGRES_PASSWORD)
+    connection.autocommit = True
+    list_viruchka = []
+    list_prof = []
+    list_valov = []
+    list_collich = []
+    list_rentab = []
+    list_date = []
+    list_date_1 = []
+    list_price_for_date = []
+    if categ == "-":
+        if market == "-":
+            table_df = pd.read_sql(
+                f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}'",
+                con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
+            for item_Выручка in table_df["Выручка"]:
+                list_prof.append(item_Выручка)
+            for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
+                list_valov.append(item_Валовая_прибыль)
+            for item_Количество_товара in table_df["Количество_товара"]:
+                list_collich.append(item_Количество_товара)
+            for item_Процент_рентабельности in table_df["Процент_рентабельности"]:
+                list_rentab.append(item_Процент_рентабельности)
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+        else:
+            table_df = pd.read_sql(
+                f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Маркетплейс = '{market}'",
+                con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
+            for item_Выручка in table_df["Выручка"]:
+                list_prof.append(item_Выручка)
+            for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
+                list_valov.append(item_Валовая_прибыль)
+            for item_Количество_товара in table_df["Количество_товара"]:
+                list_collich.append(item_Количество_товара)
+            for item_Процент_рентабельности in table_df["Процент_рентабельности"]:
+                list_rentab.append(item_Процент_рентабельности)
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+    else:
+        if market == "-":
+            table_df = pd.read_sql(
+                f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Категория_товара = '{categ}'",
+                con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
+            for item_Выручка in table_df["Выручка"]:
+                list_prof.append(item_Выручка)
+            for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
+                list_valov.append(item_Валовая_прибыль)
+            for item_Количество_товара in table_df["Количество_товара"]:
+                list_collich.append(item_Количество_товара)
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+        else:
+            table_df = pd.read_sql(
+                f"SELECT * FROM market WHERE Принят_в_обработку >= '{date_old}' AND Принят_в_обработку <= '{date_new}' AND Маркетплейс = '{market}' AND Категория_товара = '{categ}'",
+                con=get_engine_from_settings())
+            for item_viruchka in table_df["Цена_продажи"]:
+                list_viruchka.append(item_viruchka)
+            for item_Выручка in table_df["Выручка"]:
+                list_prof.append(item_Выручка)
+            for item_Валовая_прибыль in table_df["Валовая_прибыль"]:
+                list_valov.append(item_Валовая_прибыль)
+            for item_Количество_товара in table_df["Количество_товара"]:
+                list_collich.append(item_Количество_товара)
+            for item_Процент_рентабельности in table_df["Процент_рентабельности"]:
+                list_rentab.append(item_Процент_рентабельности)
+            if date_midle <= 31:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку.strip())
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Принят_в_обработку == f'{item_Выруч}'].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 31 and date_midle <= 210:
+                for item_Принят_в_обработку in table_df["Неделя_обработку"]:
+                    if item_Принят_в_обработку not in list_date:
+                        list_date.append(item_Принят_в_обработку)
+                        list_date_1.append(item_Принят_в_обработку)
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_1_Выруч in table_df[table_df.Неделя_обработку == item_Выруч].Выручка:
+                        time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+            elif date_midle > 210:
+                for item_Принят_в_обработку in table_df["Принят_в_обработку"]:
+                    data_tinne = item_Принят_в_обработку.split("-")
+                    if data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"] not in list_date:
+                        list_date.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                        list_date_1.append(data_tinne[1] + "-" + dict_month[f"{data_tinne[1]}"])
+                list_date.sort(reverse=True)
+                list_date_1.sort(reverse=True)
+                for item_Выруч in list_date:
+                    time_list_Выруч = []
+                    for item_mounth in dict_month_earth_2022[item_Выруч]:
+                        for item_1_Выруч in table_df[table_df.Принят_в_обработку == item_mounth].Выручка:
+                            time_list_Выруч.append(item_1_Выруч)
+                    midle_rent_Выруч = round((sum(time_list_Выруч)), 1)
+                    list_price_for_date.append(midle_rent_Выруч)
+    sum_viruchka = '{0:,}'.format(int(sum(list_viruchka))).replace(',', ' ')
+    summ = '{0:,}'.format(int(sum(list_prof))).replace(',', ' ')
+    summ_val = '{0:,}'.format(int(sum(list_valov))).replace(',', ' ')
+    summ_collich = '{0:,}'.format(sum(list_collich)).replace(',', ' ')
+    try:
+        summ_rentab = round(mean(list_rentab), 1)
+    except:
+        summ_rentab = 0
+    raz_sum_viruchka = int((int(viruchka.replace(" ", "")) - int(sum_viruchka.replace(" ", ""))) / (int(viruchka.replace(" ", "")) / 100))
+    raz_sum_prodaj = int((int(prodaj.replace(" ", "")) - int(summ.replace(" ", ""))) / (int(prodaj.replace(" ", "")) / 100))
+    raz_sum_valova = int((int(valova.replace(" ", "")) - int(summ_val.replace(" ", ""))) / (int(valova.replace(" ", "")) / 100))
+    raz_sum_kollich = int((int(kollich.replace(" ", "")) - int(summ_collich.replace(" ", ""))) / (int(kollich.replace(" ", "")) / 100))
+    raz_sum_pocheitt = int((float(pocheitt) - float(summ_rentab)) / (float(pocheitt) / 100))
+    return {
+        "message": f"{summ}",
+        "message1": f"{summ_val}",
+        "message2": f"{summ_collich}",
+        "message3": f"{summ_rentab}",
+        "message4": sum_viruchka,
+        "message5": str(raz_sum_viruchka) + "%",
+        "message6": str(raz_sum_prodaj) + "%",
+        "message7": str(raz_sum_valova) + "%",
+        "message8": str(raz_sum_kollich) + "%",
+        "message9": str(raz_sum_pocheitt) + "%",
+        "message10": list_price_for_date,
     }
 
 

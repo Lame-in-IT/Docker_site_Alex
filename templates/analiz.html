@@ -19,11 +19,13 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mx-auto">
                         <li class="nav-item">
-                            <a class="nav-link active link-success" aria-current="page"
-                                href="http://127.0.0.1:8000/fin/"><h4>Прогноз продаж</h4></a>
+                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/fin/"><h5>Прогноз продаж</h5></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link link-primary" href="http://127.0.0.1:8000/"><h4>Подсорт из Китая</h4></a>
+                            <a class="btn btn-outline-success" href="http://127.0.0.1:8000/"><h5>Подсорт из Китая</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-danger" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
                         </li>
                     </ul>
                 </div>
@@ -31,13 +33,13 @@
         </nav>
         <div class="container">
             <div class="row">
-                <div class="col-md-1" >
-                    <h5>Дата</h5>
+                <div class="col-md-2" >
+                    <h5>Период анализа</h5>
                 </div>
                 <div class="col-md-2">
-                    <input type="text" id="airdatepicer" class="form-control" value="01.11.2022 - 19.11.2022">
+                    <input type="text" id="airdatepicer" class="form-control" value="01.12.2022 - 31.12.2022">
                 </div>
-                <div class="col-md-1" >
+                <div class="col-md-2" >
                     <h5>Категория</h5>
                 </div>
                 <div class="col-md-2">
@@ -59,8 +61,24 @@
                         <option value="Шейкер черный">Шейкер черный</option>v
                     </select>
                 </div>
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-3">
+                    <button onclick="analiz()" class="btn btn-outline-success">Рассчитать период анализа</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
                 <div class="col-md-2" >
-                    <h5>Маркетплейс</h5>
+                    <h5>Сравнительный период</h5>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" id="airdatepicer_1" class="form-control" value="01.11.2022 - 30.11.2022">
+                </div>
+                
+                <div class="col-md-2" >
+                    <h5>Маркет</h5>
                 </div>
                 <div class="col-md-2">
                     <select class="form-select" aria-label="Маркетплейс" id="Маркетплейс">
@@ -70,51 +88,108 @@
                         <option value="Яндекс.Маркет">Яндекс Маркет</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button onclick="analiz()" class="btn btn-info">Рассчитать</button>
+                <div class="col-md-1">
+                </div>   
+                <div class="col-md-3">
+                    <button onclick="analiz_1()" class="btn btn-outline-danger">Рассчитать сравнительный период</button>
                 </div>
             </div>
         </div>
         <div class="container">
-            <div class="col-md-12 bg-black">
-                -----------------------------------------------------------
+            <div class="col-md-12 bg-success">
+                &nbsp;
             </div> 
         </div>
         <div class="container">
             <div class="row">
-                <div class="col-md-3">
-                    <h5>Продажи минус расходы</h5>
+                <div class="col-md-2">
                 </div>
-                <div class="col-md-3">
-                    <h5>Валовая прибыль</h5>
+                <div class="col-md-2">
+                    <h6>Выручка</h6>
                 </div>
-                <div class="col-md-3">
-                    <h5>Процент рентабельности</h5>
+                <div class="col-md-2">
+                    <h6>Продажи минус расходы</h6>
                 </div>
-                <div class="col-md-3">
-                    <h5>Количество товара</h5>
+                <div class="col-md-2">
+                    <h6>Валовая прибыль</h6>
+                </div>
+                <div class="col-md-2">
+                    <h6>Процент рентабельности</h6>
+                </div>
+                <div class="col-md-2">
+                    <h6>Количество товара</h6>
                 </div>
             </div>
         </div>
         <div class="container">
             <div class="row">
-                <div class="col-md-3" id="Продажи">
+                <div class="col-md-2">
+                    <h6>Результат периода анализа</h6>
+                </div>
+                <div class="col-md-2" id="Выручка">
                     <h4>0</h4>
                 </div>
-                <div class="col-md-3" id="Валовая">
+                <div class="col-md-2" id="Продажи">
                     <h4>0</h4>
                 </div>
-                <div class="col-md-3" id="Процент">
+                <div class="col-md-2" id="Валовая">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Процент">
                     <h5>0</h5>
                 </div>
-                <div class="col-md-3" id="Количество">
+                <div class="col-md-2" id="Количество">
                     <h5>0</h5>
                 </div>
             </div>
         </div>
         <div class="container">
-            <div class="col-md-12 bg-black">
-                -----------------------------------------------------------
+            <div class="row">
+                <div class="col-md-2">
+                    <h6>Результат сравнительный период</h6>
+                </div>
+                <div class="col-md-2" id="Выручка_1">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Продажи_1">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Валовая_1">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Процент_1">
+                    <h5>0</h5>
+                </div>
+                <div class="col-md-2" id="Количество_1">
+                    <h5>0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2">
+                    <h6>Разницы в периодах %</h6>
+                </div>
+                <div class="col-md-2" id="Выручка_2">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Продажи_2">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Валовая_2">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-2" id="Процент_2">
+                    <h5>0</h5>
+                </div>
+                <div class="col-md-2" id="Количество_2">
+                    <h5>0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="col-md-12 bg-success">
+                &nbsp;
             </div> 
         </div>
         <div class="container">
@@ -147,6 +222,8 @@
         <script src="static/js/analiz.js"></script>
         <script src="static/airdatepicer/air-datepicker.js"></script>
         <script src="static/airdatepicer/datepicker.js"></script>
+        <script src="static/airdatepicer/air-datepicker_1.js"></script>
+        <script src="static/airdatepicer/datepicker_1.js"></script>
     </body>
 </html>
 

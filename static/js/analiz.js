@@ -63,6 +63,10 @@ const data_kryg = {
         label: 'Выручка по датам',
         data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         borderWidth: 1
+    }, {
+        label: 'Сравнение по датам',
+        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        borderWidth: 1
     }]
 };
 
@@ -161,6 +165,47 @@ async function analiz() {
         MyCart_sun.data.labels = data.message10;
         MyCart_sun.data.datasets[0].data = data.message11;
         MyCart_sun.update()
+        document.getElementById("Выручка").textContent = data.message12;
+    }
+}
+
+async function analiz_1() {
+    const analiz = document.getElementById("Категория").value
+    const analiz1 = document.getElementById("Маркетплейс").value
+    const analiz2 = document.getElementById("airdatepicer_1").value
+    const analiz3 = document.getElementById("Продажи").textContent
+    const analiz4 = document.getElementById("Валовая").textContent
+    const analiz5 = document.getElementById("Количество").textContent
+    const analiz6 = document.getElementById("Процент").textContent
+    const analiz7 = document.getElementById("Выручка").textContent
+    const response_4 = await fetch("/analiz_1", {
+        method: "POST",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+            analiz: analiz,
+            analiz1: analiz1,
+            analiz2: analiz2,
+            analiz3: analiz3,
+            analiz4: analiz4,
+            analiz5: analiz5,
+            analiz6: analiz6,
+            analiz7: analiz7,
+        })
+    });
+    if (response_4.ok) {
+        const data = await response_4.json();
+        document.getElementById("Продажи_1").textContent = data.message;
+        document.getElementById("Валовая_1").textContent = data.message1;
+        document.getElementById("Количество_1").textContent = data.message2;
+        document.getElementById("Процент_1").textContent = data.message3;
+        document.getElementById("Выручка_1").textContent = data.message4;
+        document.getElementById("Выручка_2").textContent = data.message5;
+        document.getElementById("Продажи_2").textContent = data.message6;
+        document.getElementById("Валовая_2").textContent = data.message7;
+        document.getElementById("Количество_2").textContent = data.message8;
+        document.getElementById("Процент_2").textContent = data.message9;
+        MyCart_1.data.datasets[1].data = data.message10;
+        MyCart_1.update()
     }
 }
 
