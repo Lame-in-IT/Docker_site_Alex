@@ -200,10 +200,35 @@ async function analiz_1() {
         document.getElementById("Процент_1").textContent = data.message3;
         document.getElementById("Выручка_1").textContent = data.message4;
         document.getElementById("Выручка_2").textContent = data.message5;
+        if (data.message11 < 0) {
+            document.getElementById("Выручка_2").style.color = 'red';
+        } else if (data.message11 >= 0) {
+            document.getElementById("Выручка_2").style.color = 'black';
+        }
         document.getElementById("Продажи_2").textContent = data.message6;
+        if (data.message12 < 0) {
+            document.getElementById("Продажи_2").style.color = 'red';
+        } else if (data.message12 >= 0) {
+            document.getElementById("Продажи_2").style.color = 'black';
+        }
         document.getElementById("Валовая_2").textContent = data.message7;
+        if (data.message13 < 0) {
+            document.getElementById("Валовая_2").style.color = 'red';
+        } else if (data.message13 >= 0) {
+            document.getElementById("Валовая_2").style.color = 'black';
+        }
         document.getElementById("Количество_2").textContent = data.message8;
+        if (data.message14 < 0) {
+            document.getElementById("Количество_2").style.color = 'red';
+        } else if (data.message14 >= 0) {
+            document.getElementById("Количество_2").style.color = 'black';
+        }
         document.getElementById("Процент_2").textContent = data.message9;
+        if (data.message15 < 0) {
+            document.getElementById("Процент_2").style.color = 'red';
+        } else if (data.message15 >= 0) {
+            document.getElementById("Процент_2").style.color = 'black';
+        }
         MyCart_1.data.datasets[1].data = data.message10;
         MyCart_1.update()
     }

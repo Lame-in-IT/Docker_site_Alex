@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Подсорт из Китая</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+        <link rel="stylesheet" href="static/airdatepicer/air-datepicker.css">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/fin/"><h5>Прогноз продаж</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-success" href="http://127.0.0.1:8000/"><h5>Подсорт из Китая</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-danger" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/analiz_tabl"><h5>Таблицы</h5></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2" >
+                    <h5>Период анализа</h5>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" id="airdatepicer" class="form-control" value="01.12.2022 - 31.12.2022">
+                </div>
+                <div class="col-md-2" >
+                    <h5>Маркет</h5>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" aria-label="Маркетплейс" id="Маркетплейс">
+                        <option selected>-</option>
+                        <option value="OZON">OZON</option>
+                        <option value="Wildberries">Wildberries</option>
+                        <option value="Яндекс.Маркет">Яндекс Маркет</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button onclick="createTable()" class="btn btn-outline-success">Рассчитать таблицы</button>
+                </div>
+                <div class="col-md-2">
+                    <button onclick="createTable_1()" class="btn btn-outline-danger">Удалить таблицу</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="col-md-12 bg-success">
+                &nbsp;
+            </div> 
+        </div>
+        <div class="col-md-12 text-dark"><h3>Таблица выручки по дням</h3></div>
+        <div class="container">
+            <div id="table_alex"></div>
+        </div>
+        <div class="container">
+            <div class="col-md-12 bg-success">
+                &nbsp;
+            </div> 
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2" >
+                    <h5>ABC анализ</h5>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" aria-label="Mouth_1" id="Mouth_1">
+                        <option value="1 месяц">1 месяц</option>
+                        <option value="3 месяц">3 месяц</option>
+                        <option value="1 год">1 год</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                </div>
+                <div class="col-md-3">
+                    <button onclick="ABC_analiz()" class="btn btn-outline-primary">Рассчитать ABC анализ</button>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="ChartBox">
+                        <canvas id="myChart_22" width="1200" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <table class="table table-striped">
+                <thead>
+                  <tr class="table-success">
+                    <th scope="col">Категория</th>
+                    <th scope="col">Процент прибыли</th>
+                    <th scope="col">Накопленная доля</th>
+                    <th scope="col">Индекс</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td id="1"></td>
+                    <td id="23"></td>
+                    <td id="45"></td>
+                    <td id="67"></td>
+                  </tr>
+                  <tr>
+                    <td id="2"></td>
+                    <td id="24"></td>
+                    <td id="46"></td>
+                    <td id="68"></td>
+                  </tr>
+                  <tr>
+                    <td id="3"></td>
+                    <td id="25"></td>
+                    <td id="47"></td>
+                    <td id="69"></td>
+                  </tr>
+                  <tr>
+                    <td id="4"></td>
+                    <td id="26"></td>
+                    <td id="48"></td>
+                    <td id="70"></td>
+                  </tr>
+                  <tr>
+                    <td id="5"></td>
+                    <td id="27"></td>
+                    <td id="49"></td>
+                    <td id="71"></td>
+                  </tr>
+                  <tr>
+                    <td id="6"></td>
+                    <td id="28"></td>
+                    <td id="50"></td>
+                    <td id="72"></td>
+                  </tr>
+                  <tr>
+                    <td id="7"></td>
+                    <td id="29"></td>
+                    <td id="51"></td>
+                    <td id="73"></td>
+                  </tr>
+                  <tr>
+                    <td id="8"></td>
+                    <td id="30"></td>
+                    <td id="52"></td>
+                    <td id="74"></td>
+                  </tr>
+                  <tr>
+                    <td id="9"></td>
+                    <td id="31"></td>
+                    <td id="53"></td>
+                    <td id="75"></td>
+                  </tr>
+                  <tr>
+                    <td id="10"></td>
+                    <td id="32"></td>
+                    <td id="54"></td>
+                    <td id="76"></td>
+                  </tr>
+                  <tr>
+                    <td id="11"></td>
+                    <td id="33"></td>
+                    <td id="55"></td>
+                    <td id="77"></td>
+                  </tr>
+                  <tr>
+                    <td id="12"></td>
+                    <td id="34"></td>
+                    <td id="56"></td>
+                    <td id="78"></td>
+                  </tr>
+                  <tr>
+                    <td id="13"></td>
+                    <td id="35"></td>
+                    <td id="57"></td>
+                    <td id="79"></td>
+                  </tr>
+                  <tr>
+                    <td id="14"></td>
+                    <td id="36"></td>
+                    <td id="58"></td>
+                    <td id="80"></td>
+                  </tr>
+                  <tr>
+                    <td id="15"></td>
+                    <td id="37"></td>
+                    <td id="59"></td>
+                    <td id="81"></td>
+                  </tr>
+                  <tr>
+                    <td id="16"></td>
+                    <td id="38"></td>
+                    <td id="60"></td>
+                    <td id="82"></td>
+                  </tr>
+                  <tr>
+                    <td id="17"></td>
+                    <td id="39"></td>
+                    <td id="61"></td>
+                    <td id="83"></td>
+                  </tr>
+                  <tr>
+                    <td id="18"></td>
+                    <td id="40"></td>
+                    <td id="62"></td>
+                    <td id="84"></td>
+                  </tr>
+                  <tr>
+                    <td id="19"></td>
+                    <td id="41"></td>
+                    <td id="63"></td>
+                    <td id="85"></td>
+                  </tr>
+                  <tr>
+                    <td id="20"></td>
+                    <td id="42"></td>
+                    <td id="64"></td>
+                    <td id="86"></td>
+                  </tr>
+                  <tr>
+                    <td id="21"></td>
+                    <td id="43"></td>
+                    <td id="65"></td>
+                    <td id="87"></td>
+                  </tr>
+                  <tr>
+                    <td id="22"></td>
+                    <td id="44"></td>
+                    <td id="66"></td>
+                    <td id="88"></td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="static/js/analiz_table.js"></script>
+        <script src="static/airdatepicer/air-datepicker.js"></script>
+        <script src="static/airdatepicer/datepicker.js"></script>
+    </body>
+</html>
+
+
+
+
+
