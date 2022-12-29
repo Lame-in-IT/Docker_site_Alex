@@ -2,7 +2,7 @@ from datetime import datetime
 from datetime import date, timedelta
 
 def get_date():
-    corrent_date_1 = "{:%Y, %m, %d}".format(datetime.now()) #"2022, 10, 17" #
+    corrent_date_1 = "{:%Y, %m, %d}".format(datetime.now())
     format_date = corrent_date_1.split(",")
     year = int(format_date[0])
     month = int(format_date[1])

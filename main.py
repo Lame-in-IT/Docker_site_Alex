@@ -7,6 +7,7 @@ from starlette.responses import FileResponse
 from datetime import datetime
 import psycopg2
 import pandas as pd
+import openpyxl
 from statistics import mean
 
 from download_file import download_file
@@ -14,7 +15,7 @@ from conn_db import *
 from bd_zak import get_zak
 from get_session import get_engine_from_settings
 from dict_month import dict_month, dict_month_earth_2022
-from dict_cat import dict_cat, dict_mno
+from dict_cat import dict_cat, dict_mno, dict_rename, dict_name
 from get_date import get_date
 
 app = FastAPI()
@@ -77,6 +78,7 @@ async def zakaz(data=Body()):
             for item_name in table_df[table_df.Категория_товара == f'{dict_cat[index_categ][0]}'].Название_товара:
                 if item_name not in list_name:
                     list_name.append(item_name)
+                    list_sebest.append(dict_cat[index_categ][1])
     for item_sale_name in list_name:
         list_sale_name_time = []
         for item_name in table_df[table_df.Название_товара == f'{item_sale_name}'].Продажи_через_2_месяца:
@@ -89,9 +91,7 @@ async def zakaz(data=Body()):
                 count += 1
                 for item_sum in list_sale_name:
                     zakaz = item_sum * dict_mno[index_mouth]
-                    zakaz_1 = item_sum * dict_cat[index_categ][1]
                     full_list_prodaj.append(int(zakaz))
-                    list_sebest.append(int(zakaz_1))
             elif count > 0:
                 full_list_prodaj.clear()
             break
@@ -100,6 +100,20 @@ async def zakaz(data=Body()):
         for item_dostup_1 in table_df[table_df.Название_товара == f'{item_dostup}'].Доступно_для_продажи:
             list_dostup_time.append(item_dostup_1)
         full_list_dostup.append(sum(list_dostup_time))
+    it = 0
+    while it < 5:
+        for index_re, item_re in enumerate(list_name):
+            if item_re in dict_rename:
+                insex_list = list_name.index(f"{dict_rename[item_re]}")
+                sum_ostat = list_sale_name[index_re] + list_sale_name[insex_list]
+                list_sale_name[insex_list] = sum_ostat
+                list_name.pop(index_re)
+                list_sale_name.pop(index_re)
+                full_list_prodaj.pop(index_re)
+                full_list_dostup.pop(index_re)
+                list_sebest.pop(index_re)
+        it += 1
+        continue
     for inde, itemm in enumerate(full_list_prodaj):
         raznoch = itemm - full_list_dostup[inde]
         if raznoch > 0:
@@ -113,116 +127,71 @@ async def zakaz(data=Body()):
         if item > 0:
             list_new_name.append(list_name[index])
             list_new_zaka.append(item)
-            list_new_summa_zaku.append(list_sebest[index])
+            sum_sebes = item * list_sebest[index]
+            sum_viruchka = '{0:,}'.format(int(sum_sebes)).replace(',', ' ') + " " + "руб."
+            list_new_summa_zaku.append(sum_viruchka)
     return {
         "number": list_new_name,
         "number1": list_new_zaka,
         "number2": list_new_summa_zaku,
     }
-
-
-@app.post("/hello_2")
-async def hello_2(data=Body()):
+    
+@app.post("/zakaz_1")
+async def zakaz_1(data=Body()):
+    list_sum_sebes = []
+    list_sum_namder = []
+    list_sum = []
     list_mouth = []
-    list_categ = []
-    chbox17 = data
-    for value_mouth in range(1, 15):
-        if chbox17[f"chbox{value_mouth}"] == True:
-            list_categ.append(1)
-        if chbox17[f"chbox{value_mouth}"] == False:
-            list_categ.append(0)
-    for value_categ in range(15, 18):
-        if chbox17[f"chbox{value_categ}"] == True:
+    for index_1, item_1 in enumerate(data["zakaz_sht"]):
+        if item_1 != "":
+            sum_sebes = int(item_1) * dict_name[data["zakaz_sht1"][index_1]]
+            sum_sebes_1 = '{0:,}'.format(int(sum_sebes)).replace(',', ' ') + " " + "руб."
+            list_sum_sebes.append(sum_sebes_1)
+            list_sum.append(sum_sebes)
+            list_sum_namder.append(int(item_1))
+    sum_namder = '{0:,}'.format(int(sum(list_sum_namder))).replace(',', ' ') + " " + "шт."
+    sum_sum = '{0:,}'.format(int(sum(list_sum))).replace(',', ' ') + " " + "руб."
+    for value_categ in range(0, 3):
+        if data["zakaz_sht2"][value_categ] == True:
             list_mouth.append(1)
-        if chbox17[f"chbox{value_categ}"] == False:
+        if data["zakaz_sht2"][value_categ] == False:
             list_mouth.append(0)
-    data_zak = get_zak(list_mouth, list_categ)
+    for index_mouth, item_mouth in enumerate(list_mouth):
+        if item_mouth == 1:
+            if index_mouth == 0:
+                name_period = "Период обеспечения 2 мес."
+                break
+            elif index_mouth == 1:
+                name_period = "Период обеспечения 3 мес."
+                break
+            elif index_mouth == 2:
+                name_period = "Период обеспечения 6 мес."
+                break
+    book = openpyxl.Workbook()
+    sheet = book.active
+    sheet["A1"] = f"{name_period}"
+    sheet["A2"] = "Наименование товара"
+    sheet["B2"] = "Количество"
+    sheet["C2"] = "Себестоимость с доставкой"
+    sheet["D2"] = "Сумма заказа, руб."
+    list_index = []
+    for index_price, item_price in enumerate(list_sum):
+        index_sheet = index_price + 3
+        list_index.append(index_sheet)
+        sheet[f"A{index_sheet}"] = data["zakaz_sht1"][index_price]
+        sheet[f"B{index_sheet}"] = list_sum_namder[index_price]
+        sheet[f"C{index_sheet}"] = dict_name[data["zakaz_sht1"][index_price]]
+        sheet[f"D{index_sheet}"] = item_price
+    ind = list_index[-1] + 1
+    sheet[f"A{ind}"] = "Итого:"
+    sheet[f"B{ind}"] = sum_namder
+    sheet[f"D{ind}"] = sum_sum
+    book.save('Заказ в Китае бланк.xlsx')
+    book.close()
     return {
-        "number": data_zak[0],
-        "number1": data_zak[1],
-        "number2": data_zak[2],
-        "number3": data_zak[3],
-        "number4": data_zak[4],
-        "number5": data_zak[5],
-        "number6": data_zak[6],
-        "number7": data_zak[7],
-        "number8": data_zak[8],
-        "number9": data_zak[9],
-        "number10": data_zak[10],
-        "number11": data_zak[11],
-        "number12": data_zak[12],
-        "number13": data_zak[13],
-    }
-
-
-@app.post("/hello")
-async def hello(data=Body()):
-    number = '{0:,}'.format(data["number"]).replace(',', ' ')
-    number1 = '{0:,}'.format(data["number1"]).replace(',', ' ')
-    number2 = '{0:,}'.format(data["number2"]).replace(',', ' ')
-    number3 = '{0:,}'.format(data["number3"]).replace(',', ' ')
-    number4 = '{0:,}'.format(data["number4"]).replace(',', ' ')
-    number5 = '{0:,}'.format(data["number5"]).replace(',', ' ')
-    number6 = '{0:,}'.format(data["number6"]).replace(',', ' ')
-    number7 = '{0:,}'.format(data["number7"]).replace(',', ' ')
-    number8 = '{0:,}'.format(data["number8"]).replace(',', ' ')
-    number9 = '{0:,}'.format(data["number9"]).replace(',', ' ')
-    number10 = '{0:,}'.format(data["number10"]).replace(',', ' ')
-    number11 = '{0:,}'.format(data["number11"]).replace(',', ' ')
-    number12 = '{0:,}'.format(data["number12"]).replace(',', ' ')
-    number13 = '{0:,}'.format(data["number13"]).replace(',', ' ')
-    number14 = '{0:,}'.format(data["number14"]).replace(',', ' ')
-    number15 = '{0:,}'.format(data["number15"]).replace(',', ' ')
-    Бутылка_SL_05л = [data["number"], "Бутылка SL 0.5л"]
-    Бутылка_1л = [data["number1"], "Бутылка 1л"]
-    Шейкер_SL_черный = [data["number2"], "Шейкер SL черный"]
-    Шейкер_SL_4_цвета = [data["number3"], "Шейкер SL 4 цвета"]
-    Полотенце_SL = [data["number4"], "Полотенце SL"]
-    Овощечистка_нерж = [data["number5"], "Овощечистка нерж"]
-    Планшет_85 = [data["number6"], "Планшет 8,5"]
-    Планшет_85_цвет = [data["number7"], "Планшет 8,5 цвет"]
-    Планшет_10 = [data["number8"], "Планшет 10"]
-    Планшет_12 = [data["number9"], "Планшет 12"]
-    Лампа_ночник = [data["number10"], "Лампа ночник"]
-    Портмоне = [data["number11"], "Портмоне"]
-    Магнитная_лампа_Baseus = [data["number12"], "Магнитная лампа Baseus"]
-    Магнит_Baseus = [data["number13"], "Магнит Baseus"]
-    Заказать = data["number14"]
-    Цуна = data["number15"]
-    list_data = [Бутылка_SL_05л[0], Бутылка_1л[0], Шейкер_SL_черный[0],
-                 Шейкер_SL_4_цвета[0], Полотенце_SL[0], Овощечистка_нерж[0],
-                 Планшет_85[0], Планшет_85_цвет[0], Планшет_10[0], Планшет_12[0],
-                 Лампа_ночник[0], Портмоне[0], Магнитная_лампа_Baseus[0],
-                 Магнит_Baseus[0]]
-    list_data_name = [Бутылка_SL_05л[1], Бутылка_1л[1], Шейкер_SL_черный[1],
-                      Шейкер_SL_4_цвета[1], Полотенце_SL[1], Овощечистка_нерж[1],
-                      Планшет_85[1], Планшет_85_цвет[1], Планшет_10[1], Планшет_12[1],
-                      Лампа_ночник[1], Портмоне[1], Магнитная_лампа_Baseus[1],
-                      Магнит_Baseus[1]]
-    list_price = []
-    list_name = []
-    for index, item in enumerate(list_data):
-        if item > 0:
-            list_price.append(item)
-            list_name.append(list_data_name[index])
-    download_file(list_price, list_name, Заказать, Цуна)
-    return {
-        "message": f"{number}",
-        "message1": f"{number1}",
-        "message2": f"{number2}",
-        "message3": f"{number3}",
-        "message4": f"{number4}",
-        "message5": f"{number5}",
-        "message6": f"{number6}",
-        "message7": f"{number7}",
-        "message8": f"{number8}",
-        "message9": f"{number9}",
-        "message10": f"{number10}",
-        "message11": f"{number11}",
-        "message12": f"{number12}",
-        "message13": f"{number13}",
-        "message14": f"{number14} шт.",
-        "message15": f"{number15} руб.",
+        "zakaz_sht": list_sum_sebes,
+        "zakaz_sht1": sum_namder,
+        "zakaz_sht2": sum_sum,
     }
 
 @app.post("/ABC_analiz")
