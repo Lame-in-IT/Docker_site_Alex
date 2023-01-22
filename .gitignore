@@ -3,3 +3,5 @@ venv
 database.env
 test.txt
 __pycache__
+.vscode
+vscode
