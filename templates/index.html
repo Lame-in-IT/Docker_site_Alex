@@ -1,338 +1,299 @@
 <!doctype html>
-<html lang="ru">
+<html>
 
-<head>
-    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Анализ продаж</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Анализ продаж</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">  
-</head>
-
-<body>
-    <nav class="navbar navbar-expand-lg bg-light">
-        <div class="container-fluid">
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/fin/"><h5>Прогноз продаж</h5></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-success" href="http://127.0.0.1:8000/"><h5>Подсорт из Китая</h5></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-danger" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/analiz_tabl"><h5>Таблицы</h5></a>
-                    </li>
-                </ul>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}"> 
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="btn btn-primary" href="http://127.0.0.1:8000/fin"><h5>Прогноз продаж</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-warning" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-success" href="http://127.0.0.1:8000/"><h5>Подсорт из Китая</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/analiz_tabl"><h5>Таблицы</h5></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-success" href="http://127.0.0.1:8000/ostatki"><h5>Остатки на складах</h5></a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
-    <div class="row">
-        <div class="col-md-5">
-            <h3>Введите желаемую валовую прибыли</h3>
-        </div>
-        <div class="col-md-7">
-            <div class="input-group mb-4">
-                <input type="text" class="form-control" placeholder="Введите сумму прибыли"
-                    aria-label="Введите сумму прибыли" aria-describedby="button-addon2" id="inp"/>
-                <button class="btn btn-outline-secondary bg-danger text-white" type="button"
-                    id="button-addon2">Расчитать</button>                    
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-5">
-            <h3>Средняя прибыль за товар</h3>
-        </div>
-        <div class="col-md-7">
-            <div class="input-group mb-4">
-                <input type="text" class="form-control" placeholder="Введите сумму прибыли"
-                    aria-label="Введите сумму прибыли" aria-describedby="button-addon2" id="inp_1" value=""/>                   
-            </div>
-        </div>
-    </div>
+        </nav>
         <div class="row">
-            <div class="col-md-3">
-                <span class="colortext">
-                    <div class="valu_8"></div> 
-                </span>
+            <div class="col-md-5">
+                <h3>Введите желаемую выручку за месяц</h3>
             </div>
-            <div class="col-md-1 text-dark border border-success p-2 text-center">
-                <div class="valu_5">?</div>                    
+            <div class="col-md-2">
+                <div class="input-group mb-4">
+                    <input type="text-center" class="form-control text-center" id="inp" value="1000000"/>
+                </div>
             </div>
-            <div class="col-md-5 text-dark border border-success p-2 text-center">
-                    Отклонение от плана продаж, ежедневная выручка (руб.)
+            <div class="col-md-2">
+                <h3>Маркетплейс</h3>
             </div>
-            <div class="col-md-1">
-                <span class="colortext">
-                    <div class="valu_20"></div> 
-                </span>
-            </div>
-            <div class="col-md-1">
-                <span class="colortext">
-                    <div class="valu_21"></div> 
-                </span>
+            <div class="col-md-2">
+                <select class="form-select" aria-label="Маркетплейс" id="Маркетплейс">
+                    <option selected>-</option>
+                    <option value="OZON">OZON</option>
+                    <option value="Wildberries">Wildberries</option>
+                    <option value="Яндекс.Маркет">Яндекс Маркет</option>
+                </select>
             </div>
         </div>
-        <hr>
         <div class="row">
-            <div class="col-md-3">
-                <span class="colortext">
-                    <div class="valu_7"></div> 
-                </span>
+            <div class="col-md-5">
+                <h3>Средняя выручка за 1 товар в прошлом месяце</h3>
             </div>
-            <div class="col-md-1 text-dark border border-success p-2 text-center">
-                <div class="valu_6">?</div> 
+            <div class="col-md-2">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control text-center" placeholder="" id="inp_1" disabled>
+                </div>
             </div>
-            <div class="col-md-5 text-dark border border-success p-2 text-center">
-                Отклонение от плана продаж, ежедневные выкупы (шт.)
+            <div class="col-md-2">
             </div>
             <div class="col-md-3">
-                <span class="colortext">
-                    <div class="valu_16"></div> 
-                </span>
-            </div>
-        </div>
-    <hr>
-        <h4 class="text-center">По заказам</h4>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success text-center"><h5>Прогноз продаж за месяц</h5></div>
-            <div class="col-md-2 text-dark border border-success text-center"><h5>Цель по заказам за месяц</h5></div>
-            <div class="col-md-2 text-dark border border-success text-center"><h5>Отклонение</h5></div>
-            <div class="col-md-4 mx-5 text-dark border border-success text-center"><h4>Прогноз выполнения плана в %</h4></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-2 text-center 1">
-                <h4><div class="valu_1"></div>
-            </h4>
-            </div>
-            <div class="col-md-2 text-dark border border-success p-2 text-center">
-                <h4 class="valu_2">?</h4>
-            </div>
-            <div class="col-md-2 bg-warning border border-dark text-dark p-2 text-center">
-                <h4 class="valu_3">?</h4>
-            </div>
-            <div class="col-md-4 mx-5 text-danger border border-success text-center">
-                <h1 class="valu_4">?</h1>
-            </div>
-        </div>
-    <hr>
-        <div class="row">
-            <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
-                <h6>За месяц</h6>
-            </div>
-            <div class="col-md-1"></div>
-            <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
-                <h6>За неделю</h6>
-            </div>
-            <div class="col-md-1"></div>
-            <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
-                <h6>За вчера</h6>
-            </div>
-        </div>
-        <div class="row">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Прогноз</p>
-                    </div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Выполнение</p>
-                    </div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Факт</p>
-                    </div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Выполнение</p>
-                    </div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Факт</p>
-                    </div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <p>Выполнение</p>
-                    </div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">?</div>
-                    <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center"><div class="valu_17">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_22">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_23">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_28">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_31">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">
-                        <div class="valu_12">?</div>
-                    </div>
-                    <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center"><div class="valu_18">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_24">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_25">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_29">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_32">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_15">?</div></div>
-                    <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center"><div class="valu_19">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_26">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_27">?</div></div>
-                    <div class="col-md-1"></div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
-                    <div class="col-md-1 text-dark border border-success p-1 text-center"><div class="valu_30">?</div></div>
-                    <div class="col-md-1 bg-warning border border-success p-1 text-center"><div class="valu_33">?</div></div>
-                    <div class="col-md-1"></div>
+                <div class="input-group mb-2">
+                    <button onclick="prodaji()" class="btn btn-primary">Рассчитать прогноз</button>
                 </div>
             </div>
         </div>
-    <hr>
-    <div class="row">
-        <div class="col-md-12">
-            <h5 class="text-center my-2 text-bg-primary p-2">Декомпозиция</h5>
-        </div>
-    </div>
-        <div class="row">
-            <div class="col-md-2"></div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>План</h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <span class="colortext">
+                        <div class="valu_8"></div> 
+                    </span>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-2 text-center" id="valu_5">
+                    <div>?</div>                    
+                </div>
+                <div class="col-md-5 text-dark border border-success p-2 text-center">
+                        Отклонение от плана продаж, ежедневная выручка (руб.)
+                </div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>Факт</h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <span class="colortext">
+                        <div class="valu_7"></div> 
+                    </span>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-2 text-center" id="valu_6">
+                    <div>?</div> 
+                </div>
+                <div class="col-md-5 text-dark border border-success p-2 text-center">
+                    Отклонение от плана продаж, ежедневная выручка (шт.)
+                </div>
+                <div class="col-md-3">
+                    <span class="colortext">
+                        <div class="valu_16"></div> 
+                    </span>
+                </div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>Выполнение</h6>
+        <hr>
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-2 text-dark border border-success text-center"><h5>Прогноз продаж за месяц</h5></div>
+                <div class="col-md-2 text-dark border border-success text-center"><h5>Цель по продажам за месяц</h5></div>
+                <div class="col-md-2 text-dark border border-success text-center"><h5>Отклонение от плана</h5></div>
+                <div class="col-md-4 mx-5 text-dark border border-success text-center"><h3>Прогноз выполнения плана в %</h3></div>
             </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-2"></div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>Прошлые 31 день %</h6>
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-2 text-dark border border-success p-2 text-center 1" id="prib">
+                    <h4></h4>
+                </div>
+                <div class="col-md-2 text-dark border border-success p-2 text-center" id="prib_1">
+                    <h4>?</h4>
+                </div>
+                <div class="col-md-2 bg-warning border border-dark text-dark p-2 text-center" id="prib_2">
+                    <h4>?</h4>
+                </div>
+                <div class="col-md-4 mx-5 border border-dark text-dark p-2 text-center" id="prib_3">
+                    <h2>?</h2>
+                </div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>Текущий месяц %</h6>
+        <hr>
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
+                    <h6>За месяц</h6>
+                </div>
+                <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
+                    <h6>За неделю</h6>
+                </div>
+                <div class="col-md-3 my-3 bg-warning border border-dark text-dark text-center">
+                    <h6>За вчера</h6>
+                </div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6>Выполнение</h6>
+            <div class="row">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Прогноз</p>
+                        </div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Выполнение</p>
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Факт</p>
+                        </div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Выполнение</p>
+                        </div>
+                        <div class="col-md-1"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Факт</p>
+                        </div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">
+                            <p>Выполнение</p>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_4">?</div>
+                        <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center" id="prib_5">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_6">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_7">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Сумма руб.</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_8">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_9">?</div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_10">?</div>
+                        <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center" id="prib_11">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_12">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_13">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Кол-во</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_14">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_15">?</div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_16">?</div>
+                        <div class="col-md-1 bg-warning border border-dark text-dark p-1 text-center" id="prib_17">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_18">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_19">?</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center">Ср. чек</div>
+                        <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_20">?</div>
+                        <div class="col-md-1 bg-warning border border-success p-1 text-center" id="prib_21">?</div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Заказы, мес(руб.)</h6>
+        <hr>
+            <div class="row">
+                <div class="col-md-5"></div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center">
+                    <h6>План</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center">
+                    <h6>Факт</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center">
+                    <h6>Выполнение</h6>
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-3"></div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_34">?</div></h6>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-2 text-dark border border-success p-1 text-center">
+                    <h6>Продажи, мес(руб.)</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_22">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_23">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center" id="prib_24">
+                    <h6>?</h6>
+                </div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6 class="valu_9">?</h6>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-2 text-dark border border-success p-1 text-center">
+                    <h6>Продажи, мес(шт.)</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_25">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_26">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center" id="prib_27">
+                    <h6>?</h6>
+                </div>
             </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_39">?</div></h6>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-2 text-dark border border-success p-1 text-center">
+                    <h6>Ср. чек продаж</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_28">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_29">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center" id="prib_30">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-2"></div>
             </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Процент выкупа</h6>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-2 text-dark border border-success p-1 text-center">
+                    <h6>Продажи, день(руб.)</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_31">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_32">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center" id="prib_33">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-2"></div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_40">? %</div></h6>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-2 text-dark border border-success p-1 text-center">
+                    <h6>Продажи, день(шт.)</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_34">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 text-dark border border-success p-1 text-center" id="prib_35">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center" id="prib_36">
+                    <h6>?</h6>
+                </div>
+                <div class="col-md-2"></div>
             </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_42">? %</div></h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_44">? %</div></h6>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Заказы, мес(шт.)</h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_35">?</div></h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6 class="valu_10">?</h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_46">?</div></h6>
-            </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Отказы %</h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_41">? %</div></h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_43">? %</div></h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_45">? %</div></h6>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Ср. чек заказа</h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_36">?</div></h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6 class="valu_11">?</h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_47">?</div></h6>
-            </div>
-            <div class="col-md-2"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Заказы, день(руб.)</h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_37">?</div></h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6 class="valu_13">?</h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_48">?</div></h6>
-            </div>
-            <div class="col-md-2"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 text-dark border border-success p-1 text-center">
-                <h6>Заказы, день(шт.)</h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6><div class="valu_38">?</div></h6>
-            </div>
-            <div class="col-md-1 text-dark border border-success p-1 text-center">
-                <h6 class="valu_14">?</h6>
-            </div>
-            <div class="col-md-1 bg-warning text-dark border border-success p-1 text-center">
-                <h6><div class="valu_49">?</div></h6>
-            </div>
-            <div class="col-md-2"></div>
-        </div>
-</body>
-
+        <script src="static/js/prodaji.js"></script>
+    </body>
 </html>

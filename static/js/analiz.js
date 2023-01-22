@@ -33,7 +33,7 @@ const data_sum = {
     labels: ['Бутылка', 'Бутылка 1 литр', 'Кошелек',
         'Лампа с датчиком', 'Магнит'],
     datasets: [{
-        label: 'Доля валовой прибыли по товарам',
+        label: 'Сумма валовой прибыли по товарам',
         data: [0, 0, 0, 0, 0],
         backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
@@ -166,6 +166,7 @@ async function analiz() {
         MyCart_sun.data.datasets[0].data = data.message11;
         MyCart_sun.update()
         document.getElementById("Выручка").textContent = data.message12;
+        document.getElementById("Себестоимость").textContent = data.message13;
     }
 }
 
@@ -200,6 +201,7 @@ async function analiz_1() {
         document.getElementById("Процент_1").textContent = data.message3;
         document.getElementById("Выручка_1").textContent = data.message4;
         document.getElementById("Выручка_2").textContent = data.message5;
+        document.getElementById("Себестоимость_1").textContent = data.message16;
         if (data.message11 < 0) {
             document.getElementById("Выручка_2").style.color = 'red';
         } else if (data.message11 >= 0) {

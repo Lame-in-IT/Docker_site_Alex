@@ -22,13 +22,16 @@
                             <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/fin/"><h5>Прогноз продаж</h5></a>
                         </li>
                         <li class="nav-item">
+                            <a class="btn btn-warning" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
+                        </li>
+                        <li class="nav-item">
                             <a class="btn btn-outline-success" href="http://127.0.0.1:8000/"><h5>Подсорт из Китая</h5></a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-outline-danger" href="http://127.0.0.1:8000/analiz"><h5>Анализ продаж</h5></a>
+                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/analiz_tabl"><h5>Таблицы</h5></a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-outline-primary" href="http://127.0.0.1:8000/analiz_tabl"><h5>Таблицы</h5></a>
+                            <a class="btn btn-outline-success" href="http://127.0.0.1:8000/ostatki"><h5>Остатки на складах</h5></a>
                         </li>
                     </ul>
                 </div>
@@ -107,11 +110,14 @@
             <div class="row">
                 <div class="col-md-2">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <h6>Выручка</h6>
                 </div>
                 <div class="col-md-2">
-                    <h6>Продажи минус расходы</h6>
+                    <h6>Выручка-комиссия-логистика МП</h6>
+                </div>
+                <div class="col-md-1">
+                    <h6>Себестоимость</h6>
                 </div>
                 <div class="col-md-2">
                     <h6>Валовая прибыль</h6>
@@ -129,10 +135,13 @@
                 <div class="col-md-2">
                     <h6>Результат периода анализа</h6>
                 </div>
-                <div class="col-md-2" id="Выручка">
+                <div class="col-md-1" id="Выручка">
                     <h4>0</h4>
                 </div>
                 <div class="col-md-2" id="Продажи">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-1" id="Себестоимость">
                     <h4>0</h4>
                 </div>
                 <div class="col-md-2" id="Валовая">
@@ -151,10 +160,13 @@
                 <div class="col-md-2">
                     <h6>Результат сравнительный период</h6>
                 </div>
-                <div class="col-md-2" id="Выручка_1">
+                <div class="col-md-1" id="Выручка_1">
                     <h4>0</h4>
                 </div>
                 <div class="col-md-2" id="Продажи_1">
+                    <h4>0</h4>
+                </div>
+                <div class="col-md-1" id="Себестоимость_1">
                     <h4>0</h4>
                 </div>
                 <div class="col-md-2" id="Валовая_1">
@@ -173,11 +185,14 @@
                 <div class="col-md-2">
                     <h6>Разницы в периодах %</h6>
                 </div>
-                <div class="col-md-2" id="Выручка_2">
+                <div class="col-md-1" id="Выручка_2">
                     <h4>0</h4>
                 </div>
                 <div class="col-md-2" id="Продажи_2">
                     <h4>0</h4>
+                </div>
+                <div class="col-md-1" id="Себестоимость_2">
+                    <h4></h4>
                 </div>
                 <div class="col-md-2" id="Валовая_2">
                     <h4>0</h4>

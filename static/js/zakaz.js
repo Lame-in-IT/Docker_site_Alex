@@ -452,3 +452,4 @@ async function zakaz_1() {
         document.getElementById("300").style.color = 'red';
     }
 }
+
