@@ -1,3 +1,4 @@
+from pprint import pprint
 import uvicorn
 from fastapi import FastAPI, Request, Body, Form
 from fastapi.responses import HTMLResponse
@@ -88,7 +89,7 @@ async def zakaz(data=Body()):
             for item_name in table_df[table_df.Категория_товара == f'{dict_cat[index_categ][0]}'].Название_товара:
                 if item_name not in list_name:
                     list_name.append(item_name)
-                    list_sebest.append(dict_cat[index_categ][1])
+                    list_sebest.append(dict_cat[index_categ][1])    
     for item_sale_name in list_name:
         list_sale_name_time = []
         for item_name in table_df[table_df.Название_товара == f'{item_sale_name}'].Продажи_через_2_месяца:
@@ -107,7 +108,7 @@ async def zakaz(data=Body()):
             break
     for item_dostup in list_name:
         list_dostup_time = []
-        for item_dostup_1 in table_df[table_df.Название_товара == f'{item_dostup}'].Доступно_для_продажи:
+        for item_dostup_1 in table_df[(table_df.Название_товара == f'{item_dostup}') & (table_df.Маркетплейс == 'Основной                      ')].Доступно_для_продажи:
             list_dostup_time.append(item_dostup_1)
         full_list_dostup.append(sum(list_dostup_time))
     it = 0
@@ -128,7 +129,7 @@ async def zakaz(data=Body()):
     for inde, itemm in enumerate(full_list_prodaj):
         raznoch = itemm - full_list_dostup[inde]
         if raznoch > 0:
-            list_zakaza.append(raznoch)
+            list_zakaza.append(int(raznoch * 1.5))
         elif raznoch <= 0:
             list_zakaza.append(0)
     list_new_name = []
@@ -138,7 +139,7 @@ async def zakaz(data=Body()):
         if item > 0:
             list_new_name.append(list_name[index])
             list_new_zaka.append(item)
-            sum_sebes = item * list_sebest[index]
+            sum_sebes = int(item * list_sebest[index] * 1.5)
             sum_viruchka = '{0:,}'.format(
                 int(sum_sebes)).replace(',', ' ') + " " + "руб."
             list_new_summa_zaku.append(sum_viruchka)
@@ -1519,43 +1520,41 @@ async def ostatkiTable(data=Body()):
                                     con=get_engine_from_settings())
     # получения всех данных
     # маркетплейсы
-    list_market = ["Маркетплейс", ]
+    list_market = []
     for item_market in table_df[table_df.Дефицит_через_1_месяц < 0].Маркетплейс:
-        list_market.append(item_market)
+        list_market.append(item_market.strip())
     # склады
-    list_skald = ["Склад", ]
+    list_skald = []
     for item_sklad in table_df[table_df.Дефицит_через_1_месяц < 0].Склад:
-        list_skald.append(item_sklad)
+        list_skald.append(item_sklad.strip())
     # название товаров
-    list_name = ["Название товара", ]
+    list_name = []
     for item_name in table_df[table_df.Дефицит_через_1_месяц < 0].Название_товара: 
-        list_name.append(item_name)
+        list_name.append(item_name.strip())
     # остатки на складе
-    list_ostatkov = ["Остатки", ]
+    list_ostatkov = []
     for item_ostatkov in table_df[table_df.Дефицит_через_1_месяц < 0].Доступно_для_продажи:
         list_ostatkov.append(item_ostatkov)
     # продажи через месяц
-    list_prodaj_one_mouth = ["Продажи через месяц", ]
+    list_prodaj_one_mouth = []
     for item_pod_mouth in table_df[table_df.Дефицит_через_1_месяц < 0].Продажи_через_1_месяц:
         list_prodaj_one_mouth.append(int(item_pod_mouth * 1.5))
     # дефецит через месяц
-    list_difich = ["Дефицит через месяц", ]
+    list_difich = []
     for index_difich, item_difich in enumerate(list_prodaj_one_mouth):
-        if index_difich == 0:
-            pass
-        elif index_difich > 0:
-            raznost = list_ostatkov[index_difich] - item_difich
-            list_difich.append(raznost)
-    lin_tanl = len(list_difich)
-    return {
-        "ostatki5": list_market,
-        "ostatki6": list_skald,
-        "ostatki7": list_name,
-        "ostatki8": list_ostatkov,
-        "ostatki9": list_prodaj_one_mouth,
-        "ostatki10": list_difich,
-        "ostatki11": lin_tanl,
-    }
+        raznost = list_ostatkov[index_difich] - item_difich
+        list_difich.append(raznost)
+    dict_datas = []
+    for index_dict, item_dict in enumerate(list_market):
+        dict_data = {"ostatki5": item_dict, 
+                     "ostatki6": list_skald[index_dict], 
+                     "ostatki7": list_name[index_dict], 
+                     "ostatki8": list_ostatkov[index_dict], 
+                     "ostatki9": list_prodaj_one_mouth[index_dict],
+                     "ostatki10": list_difich[index_dict]
+                     }
+        dict_datas.append(dict_data)
+    return dict_datas
 
 if __name__ == '__main__':
     uvicorn.run(app)

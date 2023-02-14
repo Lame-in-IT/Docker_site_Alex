@@ -46,6 +46,7 @@ def gwet():
             time_list.append(item_1)
         a = round((mean(time_list)), 1)
         list_Выручка.append(a)
+    print(list_Количество_товара)
 
 
 if __name__ == '__main__':

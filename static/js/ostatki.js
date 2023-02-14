@@ -87,7 +87,6 @@ async function ostatki() {
 async function ostatkiTable() {
     const kategori = document.getElementById("Категория").value
     const market = document.getElementById("Маркетплейс").value
-    var table = document.createElement('table');
     const response_4 = await fetch("/ostatkiTable", {
         method: "POST",
         headers: { "Accept": "application/json", "Content-Type": "application/json" },
@@ -97,39 +96,19 @@ async function ostatkiTable() {
         })
     });
     if (response_4.ok) {
-        const data = await response_4.json();
-        for (var i = 0; i < data.ostatki11; i++) {
-            var tr = document.createElement('tr');
-            for (var j = 0; j < 6; j++) {
-                var td = document.createElement('td');
-                if (j == 0) {
-                    var text1 = document.createTextNode(data.ostatki5[i]);
-                    td.appendChild(text1);
-                }
-                if (j == 1) {
-                    var text1 = document.createTextNode(data.ostatki6[i]);
-                    td.appendChild(text1);
-                }
-                if (j == 2) {
-                    var text1 = document.createTextNode(data.ostatki7[i]);
-                    td.appendChild(text1);
-                }
-                if (j == 3) {
-                    var text1 = document.createTextNode(data.ostatki8[i]);
-                    td.appendChild(text1);
-                }
-                if (j == 4) {
-                    var text1 = document.createTextNode(data.ostatki9[i]);
-                    td.appendChild(text1);
-                }
-                if (j == 5) {
-                    var text1 = document.createTextNode(data.ostatki10[i]);
-                    td.appendChild(text1);
-                }
-                tr.appendChild(td);
-            }
-            table.appendChild(tr);
-        }
-        document.querySelector('#table_alex').appendChild(table);
+        var tabledata_1 = await response_4.json();
+        var table = new Tabulator("#example-table", {
+            data:tabledata_1,           
+            layout:"fitColumns",
+            columns:[                 
+                {title:"Маркетплейс", field:"ostatki5", hozAlign:"center"},
+                {title:"Склад", field:"ostatki6", hozAlign:"center"},
+                {title:"Название товара", field:"ostatki7", hozAlign:"center", width:400},
+                {title:"Остатки", field:"ostatki8", hozAlign:"center", width:150},
+                {title:"Продажи через месяц", field:"ostatki9", hozAlign:"center", width:150},
+                {title:"Дефицит через месяц", field:"ostatki10", hozAlign:"center", width:150},
+            ],
+        });
+        
     }
 }
